@@ -13,6 +13,5 @@ ru:
   number:
     currency:
       format:
-        # Формат отображения валюты и обозначение самой валюты
         unit: "₽"
         precision: 0
