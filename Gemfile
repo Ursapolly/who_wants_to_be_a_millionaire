@@ -15,11 +15,12 @@ gem 'russian'
 group :development, :test do
   gem 'sqlite3'
   gem 'byebug'
+  gem 'rspec-rails', '~> 3.7', '>= 3.7.2'
+  gem 'factory_girl_rails', '~> 4.9'
+  gem 'shoulda-matchers', '~> 3.1', '>= 3.1.2'
 end
 
 group :production do
-  # гем, улучшающий вывод логов на Heroku
-  # https://devcenter.heroku.com/articles/getting-started-with-rails4#heroku-gems
   gem 'rails_12factor'
   gem 'pg'
 end
