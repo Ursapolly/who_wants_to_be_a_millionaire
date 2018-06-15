@@ -1,3 +1,5 @@
+require 'game_help_generator'
+
 class GameQuestion < ActiveRecord::Base
   belongs_to :game
   belongs_to :question
@@ -5,6 +7,8 @@ class GameQuestion < ActiveRecord::Base
 
   validates :game, :question, presence: true
   validates :a, :b, :c, :d, inclusion: {in: 1..4}
+
+  serialize :help_hash, Hash
 
   def variants
     {
@@ -25,5 +29,33 @@ class GameQuestion < ActiveRecord::Base
 
   def correct_answer
     variants[correct_answer_key]
+  end
+
+  def add_fifty_fifty
+    self.help_hash[:fifty_fifty] = [
+        correct_answer_key,
+        (%w(a b c d) - [correct_answer_key]).sample
+    ]
+    save
+  end
+
+  def add_audience_help
+    keys_to_use = keys_to_use_in_help
+    self.help_hash[:audience_help] = GameHelpGenerator.audience_distribution(keys_to_use, correct_answer_key)
+    save
+  end
+
+  def add_friend_call
+    keys_to_use = keys_to_use_in_help
+    self.help_hash[:friend_call] = GameHelpGenerator.friend_call(keys_to_use, correct_answer_key)
+    save
+  end
+
+  private
+
+  def keys_to_use_in_help
+    keys_to_use = variants.keys
+    keys_to_use = help_hash[:fifty_fifty] if help_hash.has_key?(:fifty_fifty)
+    keys_to_use
   end
 end

@@ -31,6 +31,10 @@ class Game < ActiveRecord::Base
     end
   end
 
+  def previous_game_question
+    game_questions.detect { |q| q.question.level == previous_level }
+  end
+
   def current_game_question
     game_questions.detect { |q| q.question.level == current_level }
   end
@@ -66,14 +70,16 @@ class Game < ActiveRecord::Base
   # или 'd'.
   def answer_current_question!(letter)
     return false if time_out! || finished?
-    if current_game_question.answer_correct?(letter)
-      self.current_level += 1
 
-      if current_level == Question::QUESTION_LEVELS.max + 1
+    if current_game_question.answer_correct?(letter)
+      if current_level == Question::QUESTION_LEVELS.max
+        self.current_level += 1
         finish_game!(PRIZES[Question::QUESTION_LEVELS.max], false)
       else
+        self.current_level += 1
         save!
       end
+
       true
     else
       finish_game!(fire_proof_prize(previous_level), true)
@@ -86,6 +92,32 @@ class Game < ActiveRecord::Base
     finish_game!(previous_level > -1 ? PRIZES[previous_level] : 0, false)
   end
 
+  def use_help(help_type)
+    case help_type
+    when :fifty_fifty
+      unless fifty_fifty_used
+        toggle!(:fifty_fifty_used)
+        current_game_question.add_fifty_fifty
+        return true
+      end
+    when :audience_help
+      unless audience_help_used
+        toggle!(:audience_help_used)
+        current_game_question.add_audience_help
+        return true
+      end
+    when :friend_call
+      unless friend_call_used
+        toggle!(:friend_call_used)
+        current_game_question.add_friend_call
+        return true
+      end
+    end
+
+    false
+  end
+
+
   # Результат игры status, возвращает, одно из:
   #
   # :fail — игра проиграна из-за неверного вопроса
@@ -95,16 +127,21 @@ class Game < ActiveRecord::Base
   # :in_progress — игра еще идет
   def status
     return :in_progress unless finished?
-
     if is_failed
       # TODO:  Если TIME_LIMIT в будущем изменится, статусы
       # старых, уже сыгранных игр могут измениться. Подумайте как это исправить!
       # Ответ найдете в файле настроек вашего тестового окружения.
-      (finished_at - created_at) > TIME_LIMIT ? :timeout : :fail
-    elsif current_level > Question::QUESTION_LEVELS.max
-      :won
+      if (finished_at - created_at) <= TIME_LIMIT
+        :fail
+      else
+        :timeout
+      end
     else
-      :money
+      if current_level > Question::QUESTION_LEVELS.max
+        :won
+      else
+        :money
+      end
     end
   end
 
