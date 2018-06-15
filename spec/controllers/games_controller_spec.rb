@@ -21,7 +21,7 @@ RSpec.describe GamesController, type: :controller do
     end
 
     it 'creates game' do
-      generate_questions(60)
+      generate_questions(15)
       post :create
       game = assigns(:game)
       expect(game.finished?).to be_falsey
@@ -39,6 +39,14 @@ RSpec.describe GamesController, type: :controller do
       expect(response).to render_template('show')
     end
 
+    it '#show game of another user' do
+      another_game = FactoryGirl.create(:game_with_questions)
+      get :show, id: another_game.id
+      expect(response.status).not_to eq 200
+      expect(response).to redirect_to(root_path)
+      expect(flash[:alert]).to be
+    end
+
     it 'answer correct' do
       put :answer, id: game_w_questions.id, letter: game_w_questions.current_game_question.correct_answer_key
       game = assigns(:game)
@@ -46,6 +54,27 @@ RSpec.describe GamesController, type: :controller do
       expect(game.current_level).to be > 0
       expect(response).to redirect_to(game_path(game))
       expect(flash.empty?).to be_truthy
+    end
+
+    it 'take money' do
+      game_w_questions.update_attribute(:current_level, 2)
+      put :take_money, id: game_w_questions.id
+      game = assigns(:game)
+      expect(game.finished?).to be_truthy
+      expect(game.prize).to eq(200)
+      user.reload
+      expect(user.balance).to eq(200)
+      expect(response).to redirect_to(user_path(user))
+      expect(flash[:warning]).to be
+    end
+
+    it 'goto uncompleted game' do
+      expect(game_w_questions.finished?).to be_falsey
+      expect { post :create }.to change(Game, :count).by(0)
+      game = assigns(:game)
+      expect(game).to be_nil
+      expect(response).to redirect_to(game_path(game_w_questions))
+      expect(flash[:alert]).to be
     end
   end
 end
