@@ -61,6 +61,44 @@ RSpec.describe Game, type: :model do
     end
   end
 
+
+  describe 'game.answer_current_question' do
+    context 'answer current question is correct' do
+      it 'returns true if correct answer in progress' do
+        level = game_w_questions.current_level
+        expect(game_w_questions.answer_current_question!('d')).to be_truthy
+        expect(game_w_questions.current_level).to eq(level + 1)
+        expect(game_w_questions.status).to eq :in_progress
+      end
+
+      it 'returns true if correct last answer' do
+        level = game_w_questions.current_level[1]
+        15.times do
+          game_w_questions.answer_current_question!('d')
+          level + 1
+        end
+        expect(game_w_questions.prize).to eq 1_000_000
+        expect(game_w_questions.status).to eq(:won)
+      end
+    end
+
+
+    context 'answer current question is incorrect' do
+      it 'returns false if incorrect answer in progress' do
+        game_w_questions.current_level = 5
+        game_w_questions.answer_current_question!('a')
+        expect(game_w_questions.status).to eq(:fail)
+        expect(game_w_questions.prize).to eq 1_000
+      end
+
+      it 'returns false if timeout' do
+        game_w_questions.current_level = 2
+        game_w_questions.finished_at = Time.now
+        expect(game_w_questions.answer_current_question!('d')).to be_falsey
+      end
+    end
+  end
+
   context 'game.status' do
     before(:each) do
       game_w_questions.finished_at = Time.now
