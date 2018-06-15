@@ -12,6 +12,16 @@ RSpec.describe GameQuestion, type: :model do
                                            })
     end
 
+    it 'correct help_hash' do
+      expect(game_question.help_hash).to eq({})
+      game_question.help_hash[:foo] = 'bar'
+      game_question.help_hash[:foo2] = 'bar2'
+      game_question.help_hash[:foo3] = 'bar3'
+      expect(game_question.save).to be_truthy
+      question = GameQuestion.find(game_question.id)
+      expect(question.help_hash).to eq({foo: 'bar', foo2: 'bar2', foo3: 'bar3'})
+    end
+
     it 'correct .answer_correct?' do
       expect(game_question.answer_correct?('b')).to be_truthy
     end
@@ -33,6 +43,15 @@ RSpec.describe GameQuestion, type: :model do
       expect(game_question.help_hash).to include(:audience_help)
       ah = game_question.help_hash[:audience_help]
       expect(ah.keys).to contain_exactly('a', 'b', 'c', 'd')
+    end
+
+    it 'correct fifty_fifty help' do
+      expect(game_question.help_hash).not_to include(:fifty_fifty)
+      game_question.add_fifty_fifty
+      expect(game_question.help_hash).to include(:fifty_fifty)
+      ff = game_question.help_hash[:fifty_fifty]
+      expect(ff).to include('b')
+      expect(ff.size).to eq 2
     end
   end
 end
