@@ -14,6 +14,7 @@ class ApplicationController < ActionController::Base
       user.permit(:name, :password, :password_confirmation, :current_password)
     end
   end
+
   def set_new_game
     @new_game ||= Game.new
   end
