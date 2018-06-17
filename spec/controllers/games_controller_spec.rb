@@ -9,31 +9,31 @@ RSpec.describe GamesController, type: :controller do
   context 'Anon' do
     it 'kick from #show' do
       get :show, id: game_w_questions.id
-      expect(response.status).not_to eq 200
+      expect(response.status).to eq 302
       expect(response).to redirect_to(new_user_session_path)
-      expect(flash[:alert]).to be
+      expect(flash[:alert]).to include('Вам необходимо войти в систему или зарегистрироваться')
     end
 
     it 'forbid #create' do
       post :create
-      expect(response.status).not_to eq 200
+      expect(response.status).to eq 302
       expect(response).to redirect_to(new_user_session_path)
-      expect(flash[:alert]).to be
+      expect(flash[:alert]).to include('Вам необходимо войти в систему или зарегистрироваться')
     end
 
     it 'forbid #answer' do
       put :answer, id: game_w_questions.id, letter: game_w_questions.current_game_question.correct_answer_key
-      expect(response.status).not_to eq 200
+      expect(response.status).to eq 302
       expect(response).to redirect_to(new_user_session_path)
-      expect(flash[:alert]).to be
+      expect(flash[:alert]).to include('Вам необходимо войти в систему или зарегистрироваться')
     end
 
     it 'forbid #take_money' do
       game_w_questions.update_attribute(:current_level, 2)
       put :take_money, id: game_w_questions.id
-      expect(response.status).not_to eq 200
+      expect(response.status).to eq 302
       expect(response).to redirect_to(new_user_session_path)
-      expect(flash[:alert]).to be
+      expect(flash[:alert]).to include('Вам необходимо войти в систему или зарегистрироваться')
     end
   end
 
