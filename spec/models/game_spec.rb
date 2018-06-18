@@ -81,7 +81,7 @@ RSpec.describe Game, type: :model do
         expect(result).to be_truthy
       end
 
-      it 'returns game status in_progress' do
+      it 'saves game status' do
         game_w_questions.answer_current_question!('d')
         expect(game_w_questions.status).to eq :in_progress
       end
@@ -89,11 +89,6 @@ RSpec.describe Game, type: :model do
       it 'switches level' do
         game_w_questions.answer_current_question!('d')
         expect(game_w_questions.current_level).to eq 6
-      end
-
-      it 'saves result' do
-        game_w_questions.answer_current_question!('d')
-        expect(game_w_questions.save!).to be_truthy
       end
     end
 
@@ -112,7 +107,7 @@ RSpec.describe Game, type: :model do
         expect(game_w_questions.prize).to eq 1_000_000
       end
 
-      it 'returns game status won' do
+      it 'saves game status' do
         game_w_questions.answer_current_question!('d')
         expect(game_w_questions.status).to eq :won
       end
@@ -132,7 +127,7 @@ RSpec.describe Game, type: :model do
         expect(game_w_questions.current_level).to eq 6
       end
 
-      it 'returns game status fail' do
+      it 'saves game status' do
         game_w_questions.answer_current_question!('a')
         expect(game_w_questions.status).to eq :fail
       end
@@ -154,7 +149,7 @@ RSpec.describe Game, type: :model do
         expect(result).to be_falsey
       end
 
-      it 'returns game status timeout' do
+      it 'saves game status' do
         game_w_questions.answer_current_question!('d')
         expect(game_w_questions.status).to eq :timeout
       end
