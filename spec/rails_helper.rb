@@ -29,6 +29,7 @@ RSpec.configure do |config|
 
   config.include Devise::TestHelpers, type: :controller
   config.include Devise::TestHelpers, type: :view
+  config.include Warden::Test::Helpers, type: :feature
 
 
   #     RSpec.describe UsersController, :type => :controller do
@@ -43,3 +44,5 @@ RSpec.configure do |config|
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
 end
+
+Capybara.asset_host = "http://localhost:3000"

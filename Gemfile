@@ -20,6 +20,11 @@ group :development, :test do
   gem 'shoulda-matchers', '~> 3.1', '>= 3.1.2'
 end
 
+group :test do
+  gem 'capybara'
+  gem 'launchy'
+end
+
 group :production do
   gem 'rails_12factor'
   gem 'pg'
